@@ -30,7 +30,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-python-deployment
-  # namespace: python
+  namespace: python
 spec:
   replicas: 2
   selector:
@@ -38,7 +38,7 @@ spec:
       app: my-python-app
   template:
     metadata:
-      # namespace: python
+      namespace: python
       labels:
         app: my-python-app
     spec:
@@ -52,7 +52,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: my-python-app-svc
-  # namespace: python
+  namespace: python
 spec:
   selector:
     app: my-python-app
