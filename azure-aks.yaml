@@ -3,7 +3,28 @@ kind: Namespace
 metadata:
   name: python
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+ name: service-account-python
+ namespace: python
 
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fabric8-rbac
+subjects:
+  - kind: ServiceAccount
+    # Reference to upper's `metadata.name`
+    name: service-account-python
+    # Reference to upper's `metadata.namespace`
+    namespace: python
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---  
 apiVersion: apps/v1
 kind: Deployment
 metadata:
