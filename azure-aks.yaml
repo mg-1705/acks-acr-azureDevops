@@ -4,7 +4,6 @@ metadata:
   name: python-app
   
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
