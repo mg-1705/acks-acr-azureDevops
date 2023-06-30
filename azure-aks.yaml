@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: pythondockerrepo
-        image: akspython.azurecr.io/test:v1
+        image: akspython.azurecr.io/python-test:v3
         ports:
         - containerPort: 5000
 ---
