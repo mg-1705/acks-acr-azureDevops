@@ -30,6 +30,6 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ secrets.ACR_ENDPOINT }}/python-app:v1
+        tags: ${{ secrets.ACR_ENDPOINT }}/python-app:v2
         file: Dockerfile
           
