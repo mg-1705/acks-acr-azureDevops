@@ -31,14 +31,14 @@ jobs:
       - name: Install Azure CLI
         uses: azure/CLI@v1
         with:
-          inlineScript: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }} --kubernetesVersion ${{ env.kubernetesVersion }} --generate-ssh-keys
+          inlineScript: az aks get-credentials --admin --name MyManagedCluster --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }} 
 #       - name: Configure kubectl
 #         run: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }}
 
       - name: Deploy to AKS
         run: |
           kubectl apply -f azure-aks.yaml
-#       - name: Deploy to AKS
+#       - name: Deploy to AKS    --kubernetesVersion ${{ env.kubernetesVersion }} --generate-ssh-keys
 #         uses: azure/aks-set-context@v1
 #         with:
 #           creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
