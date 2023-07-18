@@ -1,8 +1,11 @@
 name: docker_build_push_acr
 
 on:
-  workflow_dispatch:
-
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
 jobs:
   docker_build_push_acr:
     name: 'Docker Build and Push to ACR'
