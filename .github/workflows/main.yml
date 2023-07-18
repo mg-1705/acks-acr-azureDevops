@@ -28,9 +28,10 @@ jobs:
 
       - name: Install Azure CLI
         uses: azure/CLI@v1
-
-      - name: Configure kubectl
-        run: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }}
+        with:
+          inlineScript: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }}
+#       - name: Configure kubectl
+#         run: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }}
 
       - name: Deploy to AKS
         run: |
