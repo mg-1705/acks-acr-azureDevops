@@ -1,59 +1,38 @@
-on: [push]
+name: Build and Deploy to AKS
 
-# Environment variables available to all jobs and steps in this workflow
-env:
-  REGISTRY_NAME: python-app
-  CLUSTER_NAME: github-action-kube
-  CLUSTER_RESOURCE_GROUP: githubKube
-  NAMESPACE: default
-  
+on:
+  push:
+    branches:
+      - master
+
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    environment: dev
+
     steps:
-    - uses: actions/checkout@master
-    
-    # Connect to Azure Container registry (ACR)
-    - uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.ACR_ENDPOINT }}
-        username: ${{ secrets.ACR_USERNAME }} 
-        password: ${{ secrets.ACR_PASSWORD_SECRET }}
-    
-    # Container build and push to a Azure Container registry (ACR)
-    - run: |
-        docker build . -t ${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}
-        docker push ${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}
-    
-    # Set the target Azure Kubernetes Service (AKS) cluster. 
-    - uses: azure/aks-set-context@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
-        cluster-name: ${{ env.CLUSTER_NAME }}
-        resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
-    
-    # Create namespace if doesn't exist
-    - run: |
-        kubectl create namespace ${{ env.NAMESPACE }} --dry-run -o json | kubectl apply -f -
-    
-    # Create imagepullsecret for Azure Container registry (ACR)
-    - uses: azure/k8s-create-secret@v1
-      with:
-        container-registry-url: ${{ secrets.ACR_ENDPOINT }}
-        container-registry-username: ${{ secrets.ACR_USERNAME }} 
-        container-registry-password: ${{ secrets.ACR_PASSWORD_SECRET }}
-        secret-name: ${{ env.REGISTRY_NAME }}-registry-connection
-        namespace: ${{ env.NAMESPACE }}
-    
-    # Deploy app to AKS
-    - uses: azure/k8s-deploy@v1
-      with:
-        manifests: |
-          manifests/deployment.yml
-          manifests/service.yml
-        images: |
-          ${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}
-        imagepullsecrets: |
-          ${{ env.REGISTRY_NAME }}-registry-connection
-        namespace: ${{ env.NAMESPACE }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
+
+      - name: Build and push Docker image
+        env:
+          ACR_NAME: ${{ secrets.ACR_ENDPOINT }}
+        run: |
+          docker build -t $ACR_NAME/python-new:${{ github.sha }} .
+          docker login $ACR_NAME -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD_SECRET }}
+          docker push $ACR_NAME/python-new:${{ github.sha }}
+
+      - name: Install Azure CLI
+        uses: azure/CLI@v1
+
+      - name: Deploy to AKS
+        env:
+          AKS_CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
+          ACR_NAME: ${{ secrets.ACR_ENDPOINT }}
+        run: |
+          az aks get-credentials --resource-group your-aks-resource-group --name $AKS_CLUSTER_NAME
+          kubectl set image deployment/your-app-deployment your-app-container=$ACR_NAME/python-new:${{ github.sha }}
