@@ -42,7 +42,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
-          resource-group: your-aks-resource-group
+          resource-group: RG-DISCOVERDOLLAR
           container-registry-url: ${{ secrets.ACR_ENDPOINT }}
           container-registry-username: ${{ secrets.ACR_USERNAME }}
           container-registry-password: ${{ secrets.ACR_PASSWORD_SECRET }}
