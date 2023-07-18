@@ -26,13 +26,25 @@ jobs:
           docker login $ACR_NAME -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD_SECRET }}
           docker push $ACR_NAME/python-new:${{ github.sha }}
 
-      - name: Install Azure CLI
-        uses: azure/CLI@v1
+#       - name: Install Azure CLI
+#         uses: azure/CLI@v1
 
+#       - name: Deploy to AKS
+#         env:
+#           AKS_CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
+#           ACR_NAME: ${{ secrets.ACR_ENDPOINT }}
+#         run: |
+#           az aks get-credentials --resource-group your-aks-resource-group --name $AKS_CLUSTER_NAME
+#           kubectl set image deployment/your-app-deployment your-app-container=$ACR_NAME/python-new:${{ github.sha }}
+          
       - name: Deploy to AKS
+        uses: azure/aks-set-context@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
+          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+          resource-group: your-aks-resource-group
+          container-registry-url: ${{ secrets.ACR_ENDPOINT }}
+          container-registry-username: ${{ secrets.ACR_USERNAME }}
+          container-registry-password: ${{ secrets.ACR_PASSWORD_SECRET }}
         env:
-          AKS_CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
-          ACR_NAME: ${{ secrets.ACR_ENDPOINT }}
-        run: |
-          az aks get-credentials --resource-group your-aks-resource-group --name $AKS_CLUSTER_NAME
-          kubectl set image deployment/your-app-deployment your-app-container=$ACR_NAME/python-new:${{ github.sha }}
+          IMAGE_NAME: ${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}    
