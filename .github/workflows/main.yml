@@ -1,5 +1,7 @@
 name: Build and Deploy to AKS
 
+env:
+  kubernetesVersion: '1.25.6'
 on:
   push:
     branches:
@@ -29,7 +31,7 @@ jobs:
       - name: Install Azure CLI
         uses: azure/CLI@v1
         with:
-          inlineScript: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }}
+          inlineScript: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }} --kubernetesVersion ${{ env.kubernetesVersion }} --generate-ssh-keys
 #       - name: Configure kubectl
 #         run: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }}
 
