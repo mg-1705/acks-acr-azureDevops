@@ -1,8 +1,8 @@
-# apiVersion: v1
-# kind: Namespace
-# metadata:
-#   name: python
-# ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: python
+---
 # apiVersion: v1
 # kind: ServiceAccount
 # metadata:
@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
       - name: pythondockerrepo
-        image: akspython.azurecr.io/python-test:v3
+        image: githubactionacrprac.azurecr.io/python-new:${{ github.sha }}
         ports:
         - containerPort: 5000
 ---
