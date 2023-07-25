@@ -43,8 +43,7 @@ jobs:
           az aks get-credentials --resource-group dd-prac-pvt --name dd-kube-pvt
           az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get ns"
           git clone https://${{ secrets.tokennew }}@github.com/mg-1705/acks-acr-azureDevops.git
-          az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl apply -f azure-aks.yaml" --file "acks-acr-azureDevops
-/azure-aks.yaml"
+          az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl apply -f azure-aks.yaml" --file "acks-acr-azureDevops/azure-aks.yaml"
           az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get ns"
           sleep 40
           az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get all -n python"
