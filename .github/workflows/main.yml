@@ -38,10 +38,12 @@ jobs:
         uses: azure/setup-kubectl@v3
       - name: 'Run az commands'
         shell: pwsh
-        run: |
+        run: |                      
           az account set --subscription 0af70dac-a1c3-49b9-913e-41d1d2168474
           az aks get-credentials --resource-group dd-prac-pvt --name dd-kube-pvt
           az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get ns"
+          git clone https://${{ secrets.tokennew }}@github.com/mg-1705/acks-acr-azureDevops.git
+          ls
 #       - name: Deploy to AKS
 #         id: deploy-aks
 #         uses: Azure/k8s-deploy@v4
