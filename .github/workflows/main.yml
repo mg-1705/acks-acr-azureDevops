@@ -36,15 +36,21 @@ jobs:
       - name: Setup kubectl
         id: install-kubectl
         uses: azure/setup-kubectl@v3
-      - name: Deploy to AKS
-        id: deploy-aks
-        uses: Azure/k8s-deploy@v4
-        with:
-          namespace: 'python'
-          manifests: |
-             azure-aks.yaml
-          images: '${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}'
-          pull-images: false 
+      - name: 'Run az commands'
+        shell: pwsh
+        run: |
+          az account set --subscription 0af70dac-a1c3-49b9-913e-41d1d2168474
+          az aks get-credentials --resource-group dd-prac-pvt --name dd-kube-pvt
+          az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get ns"
+#       - name: Deploy to AKS
+#         id: deploy-aks
+#         uses: Azure/k8s-deploy@v4
+#         with:
+#           namespace: 'python'
+#           manifests: |
+#              azure-aks.yaml
+#           images: '${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}'
+#           pull-images: false 
 #       - name: Install Azure CLI
 #         uses: azure/CLI@v1
 #         with:
