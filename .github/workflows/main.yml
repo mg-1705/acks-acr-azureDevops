@@ -31,7 +31,7 @@ jobs:
         id: set-context
         uses: azure/aks-set-context@v3
         with:
-          resource-group: RG-DISCOVERDOLLAR
+          resource-group: dd-prac-pvt
           cluster-name: '${{ secrets.AKS_CLUSTER_NAME }}'
       - name: Setup kubectl
         id: install-kubectl
