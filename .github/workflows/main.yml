@@ -1,13 +1,16 @@
 name: Build and Deploy to AKS
 
-env:
-  kubernetesVersion: '1.25.6'
 on:
+  schedule:
+    - cron: '50 11 * * *'
+    - cron: '58 11 * * *'
   push:
     branches:
-      - master
+      - main
 
 jobs:
+  aks-start:
+    runs-on: ubuntu-latest
   build-and-deploy:
     runs-on: ubuntu-latest
 
@@ -18,63 +21,38 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Build and push Docker image
         env:
-          ACR_NAME: ${{ secrets.ACR_ENDPOINT }}
+          ACR_NAME: 'githubactionaksacr.azurecr.io'
         run: |
-          docker build -t $ACR_NAME/python-new:${{ github.sha }} .
-          docker login $ACR_NAME -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD_SECRET }}
-          docker push $ACR_NAME/python-new:${{ github.sha }}
+          docker build -t githubactionaksacr.azurecr.io/python-new:v1 .
+          docker login $ACR_NAME -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+          docker push githubactionaksacr.azurecr.io/python-new:v1
+      - name: Start AKS
+        run: |
+          az aks start --resource-group github-aks --name mg-kube-prac
+        if: github.event_name == 'schedule' && startsWith(github.event.schedule, '50 11')    
       - name: Set AKS context
         id: set-context
         uses: azure/aks-set-context@v3
         with:
-          resource-group: dd-prac-pvt
-          cluster-name: '${{ secrets.AKS_CLUSTER_NAME }}'
+          resource-group: github-aks
+          cluster-name: mg-kube-prac
       - name: Setup kubectl
         id: install-kubectl
         uses: azure/setup-kubectl@v3
-      - name: 'Run az commands'
-        shell: pwsh
-        run: |                      
-          az account set --subscription 0af70dac-a1c3-49b9-913e-41d1d2168474
-          az aks get-credentials --resource-group dd-prac-pvt --name dd-kube-pvt
-          az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get ns"
-          git clone https://${{ secrets.tokennew }}@github.com/mg-1705/acks-acr-azureDevops.git
-          az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl apply -f azure-aks.yaml" --file "acks-acr-azureDevops/azure-aks.yaml"
-          az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get ns"
-          sleep 40
-          az aks command invoke --resource-group dd-prac-pvt --name dd-kube-pvt --command "kubectl get all -n python"
-          
-#       - name: Deploy to AKS
-#         id: deploy-aks
-#         uses: Azure/k8s-deploy@v4
-#         with:
-#           namespace: 'python'
-#           manifests: |
-#              azure-aks.yaml
-#           images: '${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}'
-#           pull-images: false 
-#       - name: Install Azure CLI
-#         uses: azure/CLI@v1
-#         with:
-#           inlineScript: az aks get-credentials --admin --name MyManagedCluster --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }} 
-# #       - name: Configure kubectl
-# #         run: az aks get-credentials --resource-group RG-DISCOVERDOLLAR --name ${{ secrets.AKS_CLUSTER_NAME }}
-
-#       - name: Deploy to AKS
-#         run: |
-#           kubectl apply -f azure-aks.yaml
-#       - name: Deploy to AKS    --kubernetesVersion ${{ env.kubernetesVersion }} --generate-ssh-keys
-#         uses: azure/aks-set-context@v1
-#         with:
-#           creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
-#           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
-#           resource-group: RG-DISCOVERDOLLAR
-#           container-registry-url: ${{ secrets.ACR_ENDPOINT }}
-#           container-registry-username: ${{ secrets.ACR_USERNAME }}
-#           container-registry-password: ${{ secrets.ACR_PASSWORD_SECRET }}
-#         env:
-#           IMAGE_NAME: ${{ secrets.ACR_ENDPOINT }}/python-new:${{ github.sha }}    
+      - name: Deploy to AKS
+        id: deploy-aks
+        uses: Azure/k8s-deploy@v4
+        with:
+          namespace: 'python'
+          manifests: |
+             azure-aks.yaml
+          images: githubactionaksacr.azurecr.io/python-new:v1
+          pull-images: false 
+      - name: Stop AKS
+        run: |
+          az aks stop --resource-group github-aks --name mg-kube-prac
+        if: github.event_name == 'schedule' && startsWith(github.event.schedule, '58 11')      
