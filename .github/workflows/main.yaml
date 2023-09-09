@@ -5,8 +5,8 @@ on:
     branches:
       - master
   schedule:
-    - cron: '44 13 * * *'
-    - cron: '46 13 * * *'      
+    - cron: '46 13 * * *'
+    - cron: '48 13 * * *'      
 
 jobs:
   build-and-deploy:
@@ -17,7 +17,7 @@ jobs:
       #   uses: actions/checkout@v2
       - name: Smoke Test
         uses: actions/checkout@v2
-        if: github.event.schedule == '44 13 * * *'
+        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '46 13 * * *')
         with:
           # Run regression test suite
           command: npm run smoke-test
@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Sanity Test
         uses: actions/checkout@v2
-        if: github.event.schedule == '46 13 * * *'
+        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '48 13 * * *')
         with:
           # Run sanity test suite
           command: npm run sanity-test          
