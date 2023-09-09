@@ -6,7 +6,7 @@ on:
   #   - cron: '59 11 * * *'
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-deploy:
