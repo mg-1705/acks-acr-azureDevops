@@ -2,8 +2,8 @@ name: Build and Deploy to AKS
 
 on:
   schedule:
-    - cron: '50 11 * * *'
     - cron: '58 11 * * *'
+    - cron: '59 11 * * *'
   push:
     branches:
       - main
