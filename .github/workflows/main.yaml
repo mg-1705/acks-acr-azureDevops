@@ -1,23 +1,34 @@
 name: Build and Deploy to AKS
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
   schedule:
-    - cron: '28 13 * * *'
-    # - cron: '15 13 * * *'      
+    - cron: '42 13 * * *'
+    - cron: '46 13 * * *'      
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkouts repository
+      # - name: Checkouts repository
+      #   uses: actions/checkout@v2
+      - name: Smoke Test
         uses: actions/checkout@v2
-      - name: Debug Message Before Start
-        if: ${{ github.event.schedule == 'schedule' }} && startsWith(github.event.schedule, '28 13 * * *')
-        run: echo "Starting AKS cluster..."
+        if: github.event.schedule == '42 13 * * *'
+        with:
+          # Run regression test suite
+          command: npm run smoke-test
+  ui-chrome-sanity-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sanity Test
+        uses: actions/checkout@v2
+        if: github.event.schedule == '46 13 * * *'
+        with:
+          # Run sanity test suite
+          command: npm run sanity-test          
+          
       # if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '17 13 * * *')
       # - name: Login to Azure
       #   uses: azure/login@v1
