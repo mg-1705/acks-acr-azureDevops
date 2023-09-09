@@ -1,9 +1,9 @@
 name: Build and Deploy to AKS
 
 on:
-  schedule:
-    - cron: '58 11 * * *'
-    - cron: '59 11 * * *'
+  # schedule:
+  #   - cron: '58 11 * * *'
+  #   - cron: '59 11 * * *'
   push:
     branches:
       - main
@@ -28,10 +28,10 @@ jobs:
           docker build -t githubactionaksacr.azurecr.io/python-new:v1 .
           docker login $ACR_NAME -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
           docker push githubactionaksacr.azurecr.io/python-new:v1
-      - name: Start AKS
-        run: |
-          az aks start --resource-group github-aks --name mg-kube-prac
-        if: github.event_name == 'schedule' && startsWith(github.event.schedule, '50 11')    
+      # - name: Start AKS
+      #   run: |
+      #     az aks start --resource-group github-aks --name mg-kube-prac
+      #   if: github.event_name == 'schedule' && startsWith(github.event.schedule, '50 11')    
       - name: Set AKS context
         id: set-context
         uses: azure/aks-set-context@v3
@@ -50,7 +50,7 @@ jobs:
              azure-aks.yaml
           images: githubactionaksacr.azurecr.io/python-new:v1
           pull-images: false 
-      - name: Stop AKS
-        run: |
-          az aks stop --resource-group github-aks --name mg-kube-prac
-        if: github.event_name == 'schedule' && startsWith(github.event.schedule, '58 11')      
+      # - name: Stop AKS
+      #   run: |
+      #     az aks stop --resource-group github-aks --name mg-kube-prac
+      #   if: github.event_name == 'schedule' && startsWith(github.event.schedule, '58 11')      
