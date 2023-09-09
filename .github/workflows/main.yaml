@@ -5,8 +5,8 @@ on:
     branches:
       - master
   schedule:
-    - cron: '3 13 * * *'
-    - cron: '15 13 * * *'      
+    - cron: '14 13 * * *'
+    # - cron: '15 13 * * *'      
 
 jobs:
   build-and-deploy:
@@ -15,47 +15,46 @@ jobs:
     steps:
       - name: Checkouts repository
         uses: actions/checkout@v2
+      - name: Debug Message Before Start
+        run: echo "Starting AKS cluster..."
+        if: github.event_name == 'schedule' && startsWith(github.event.schedule, '14 13 * * *')
+      # - name: Login to Azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Build and push Docker image
-        env:
-          ACR_NAME: 'githubactionaksacr.azurecr.io'
-        run: |
-          docker build -t githubactionaksacr.azurecr.io/python-new:v1 .
-          docker login $ACR_NAME -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-          docker push githubactionaksacr.azurecr.io/python-new:v1
-      # - name: Debug Scheduled Time
-      #   run: echo "Scheduled Time: ${{ github.event.schedule }}"
-      - name: Start AKS
-        run: |
-          az aks start --resource-group github-aks --name mg-kube-prac
-        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '3 13 * * *')    
-      - name: Set AKS context
-        id: set-context
-        uses: azure/aks-set-context@v3
-        with:
-          resource-group: github-aks
-          cluster-name: mg-kube-prac
-      - name: Setup kubectl
-        id: install-kubectl
-        uses: azure/setup-kubectl@v3
-      # - name: create k8s namespace
+      # - name: Build and push Docker image
+      #   env:
+      #     ACR_NAME: 'githubactionaksacr.azurecr.io'
       #   run: |
-      #     kubectl create namespace python
-      - name: Deploy to AKS
-        id: deploy-aks
-        uses: Azure/k8s-deploy@v4
-        with:
-          namespace: 'python'
-          manifests: |
-             azure-aks.yaml
-          images: githubactionaksacr.azurecr.io/python-new:v1
-          pull-images: false 
-      - name: Stop AKS
-        run: |
-          az aks stop --resource-group github-aks --name mg-kube-prac
-        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '15 13 * * *')      
+      #     docker build -t githubactionaksacr.azurecr.io/python-new:v1 .
+      #     docker login $ACR_NAME -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+      #     docker push githubactionaksacr.azurecr.io/python-new:v1
+     
+      # - name: Start AKS
+      #   run: |
+      #     az aks start --resource-group github-aks --name mg-kube-prac
+      #   if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '3 13 * * *')    
+      # - name: Set AKS context
+      #   id: set-context
+      #   uses: azure/aks-set-context@v3
+      #   with:
+      #     resource-group: github-aks
+      #     cluster-name: mg-kube-prac
+      # - name: Setup kubectl
+      #   id: install-kubectl
+      #   uses: azure/setup-kubectl@v3
+      
+      # - name: Deploy to AKS
+      #   id: deploy-aks
+      #   uses: Azure/k8s-deploy@v4
+      #   with:
+      #     namespace: 'python'
+      #     manifests: |
+      #        azure-aks.yaml
+      #     images: githubactionaksacr.azurecr.io/python-new:v1
+      #     pull-images: false 
+      # - name: Stop AKS
+      #   run: |
+      #     az aks stop --resource-group github-aks --name mg-kube-prac
+      #   if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '15 13 * * *')      
