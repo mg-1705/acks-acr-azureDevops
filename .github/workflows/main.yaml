@@ -41,6 +41,9 @@ jobs:
       - name: Setup kubectl
         id: install-kubectl
         uses: azure/setup-kubectl@v3
+      - name: create k8s namespace
+        run: |
+          kubectl create namespace python
       - name: Deploy to AKS
         id: deploy-aks
         uses: Azure/k8s-deploy@v4
