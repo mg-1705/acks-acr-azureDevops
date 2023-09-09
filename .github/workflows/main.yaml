@@ -5,8 +5,8 @@ on:
     branches:
       - master
   schedule:
-    - cron: '53 0 * * *'
-    - cron: '15 17 * * *'      
+    - cron: '3 13 * * *'
+    - cron: '15 13 * * *'      
 
 jobs:
   build-and-deploy:
@@ -33,7 +33,7 @@ jobs:
       - name: Start AKS
         run: |
           az aks start --resource-group github-aks --name mg-kube-prac
-        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '53 0')    
+        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '3 13 * * *')    
       - name: Set AKS context
         id: set-context
         uses: azure/aks-set-context@v3
@@ -58,4 +58,4 @@ jobs:
       - name: Stop AKS
         run: |
           az aks stop --resource-group github-aks --name mg-kube-prac
-        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '17 13')      
+        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '15 13 * * *')      
