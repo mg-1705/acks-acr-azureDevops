@@ -1,10 +1,10 @@
 name: Stop AKS
 on:
-  push:
-    branches:
-      - master
+  # push:
+  #   branches:
+  #     - master
   schedule:
-    - cron: '23 9 * * *'
+    - cron: '38 9 * * *'
     
 jobs:
   build-and-deploy:
