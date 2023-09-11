@@ -1,0 +1,24 @@
+name: Build and Deploy to AKS
+
+on:
+  # push:
+  #   branches:
+  #     - master
+  schedule:
+    - cron: '*/5 * * * *'
+    
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkouts repository
+        uses: actions/checkout@v2
+          
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
+      - name: Stop AKS
+        run: |
+          az aks stop --resource-group github-aks --name mg-kube-prac
