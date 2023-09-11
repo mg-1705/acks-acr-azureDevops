@@ -22,7 +22,7 @@ jobs:
 
       - name: Build and push Docker image
         env:
-          ACR_NAME: 'githubactionaksacr.azurecr.io'
+          ACR_NAME: 'githubaksacrman.azurecr.io'
         run: |
           docker build -t githubaksacrman.azurecr.io/python-new:v1 .
           docker login $ACR_NAME -u ${{ secrets.REGISTRY_USERNAME_NEW }} -p ${{ secrets.REGISTRY_PASSWORD_NEW }}
