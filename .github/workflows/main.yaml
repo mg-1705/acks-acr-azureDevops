@@ -1,13 +1,10 @@
 name: Build and Deploy to AKS
 
 on:
-  # push:
-  #   branches:
-  #     - master
-  schedule:
-    - cron: '13 9 * * *'
-    - cron: '19 9 * * *'      
-
+  push:
+    branches:
+      - master
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -15,61 +12,55 @@ jobs:
     steps:
       - name: Checkouts repository
         uses: actions/checkout@v2
-      # - name: Smoke Test
-      #   uses: actions/checkout@v2
-      #   # if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '56 13 * * *')
-      #   with:
-      #     # Run regression test suite
-      #     command: npm run smoke-test
             
           
       # if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '17 13 * * *')
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
 
-      # - name: Build and push Docker image
-      #   env:
-      #     ACR_NAME: 'githubactionaksacr.azurecr.io'
-      #   run: |
-      #     docker build -t githubactionaksacr.azurecr.io/python-new:v1 .
-      #     docker login $ACR_NAME -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-      #     docker push githubactionaksacr.azurecr.io/python-new:v1
+      - name: Build and push Docker image
+        env:
+          ACR_NAME: 'githubactionaksacr.azurecr.io'
+        run: |
+          docker build -t githubaksacrman.azurecr.io/python-new:v1 .
+          docker login $ACR_NAME -u ${{ secrets.REGISTRY_USERNAME_NEW }} -p ${{ secrets.REGISTRY_PASSWORD_NEW }}
+          docker push githubaksacrman.azurecr.io/python-new:v1
      
-      - name: Start AKS
-        run: |
-          az aks start --resource-group github-aks --name mg-kube-prac
-        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '13 9 * * *')    
-  builds-and-stop:
-    runs-on: ubuntu-latest
+  #     - name: Start AKS
+  #       run: |
+  #         az aks start --resource-group github-aks --name mg-kube-prac
+  #       if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '13 9 * * *')    
+  # builds-and-stop:
+  #   runs-on: ubuntu-latest
 
-    steps:    
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Stop AKS
-        run: |
-          az aks stop --resource-group github-aks --name mg-kube-prac
-        if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '19 9 * * *')      
+  #   steps:    
+  #     - name: Login to Azure
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
+  #     - name: Stop AKS
+  #       run: |
+  #         az aks stop --resource-group github-aks-acr --name github-aks-acr-new
+  #       if: ${{ github.event_name == 'schedule' }} && startsWith(github.event.schedule, '19 9 * * *')      
     
-      # - name: Set AKS context
-      #   id: set-context
-      #   uses: azure/aks-set-context@v3
-      #   with:
-      #     resource-group: github-aks
-      #     cluster-name: mg-kube-prac
-      # - name: Setup kubectl
-      #   id: install-kubectl
-      #   uses: azure/setup-kubectl@v3
+      - name: Set AKS context
+        id: set-context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: github-aks-acr
+          cluster-name: github-aks-acr-new
+      - name: Setup kubectl
+        id: install-kubectl
+        uses: azure/setup-kubectl@v3
       
-      # - name: Deploy to AKS
-      #   id: deploy-aks
-      #   uses: Azure/k8s-deploy@v4
-      #   with:
-      #     namespace: 'python'
-      #     manifests: |
-      #        azure-aks.yaml
-      #     images: githubactionaksacr.azurecr.io/python-new:v1
-      #     pull-images: false 
+      - name: Deploy to AKS
+        id: deploy-aks
+        uses: Azure/k8s-deploy@v4
+        with:
+          namespace: 'python'
+          manifests: |
+             azure-aks.yaml
+          images: githubaksacrman.azurecr.io/python-new:v1
+          pull-images: false 
