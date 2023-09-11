@@ -4,7 +4,7 @@ on:
     branches:
       - master
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '23 9 * * *'
     
 jobs:
   build-and-deploy:
@@ -20,4 +20,4 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS_NEW }}
       - name: Stop AKS
         run: |
-          az aks stop --resource-group github-aks --name mg-kube-prac
+          az aks stop --resource-group github-aks-acr --name github-aks-acr-new
