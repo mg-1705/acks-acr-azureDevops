@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: pythondockerrepo
-        image: githubactionaksacr.azurecr.io/python-new:v1
+        image: githubaksacrman.azurecr.io/python-new:v1
         ports:
         - containerPort: 5000
 
